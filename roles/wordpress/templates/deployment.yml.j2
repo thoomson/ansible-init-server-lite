@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{deploy_name}}
+  namespace: {{namespace}}
+  labels:
+    app: {{deploy_name}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{deploy_name}}
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate    
+  template:
+    metadata:
+      labels:
+        app: {{deploy_name}}
+    spec:
+      containers:
+      - name: {{deploy_name}}
+        volumeMounts:
+        - name : wordpress-storage
+          mountPath: /var/www/html
+        image: {{image}}:5.7.2-php8.0-apache
+        ports:
+        - containerPort: {{image_port}}
+        args:
+        - --providers.kubernetescrd
+        - --entrypoints.web.address=:80
+        - --entrypoints.websecure.address=:443
+        - --certificatesresolvers.le.acme.email={{master_mail_address}}
+        - --certificatesresolvers.le.acme.storage=/cert/acme.json
+        - --certificatesResolvers.le.acme.httpChallenge.entryPoint=web
+        env:
+        - name: WORDPRESS_DB_HOST
+          value: 127.0.0.1
+        - name: WORDPRESS_DB_USER
+          value: {{wp_user}}
+        - name: WORDPRESS_DB_PASSWORD
+          value: {{wp_pass}}
+        - name: WORDPRESS_DB_NAME
+          value: {{wp_name}}
+      - name: mysql
+        volumeMounts:
+        - name : mysql-storage
+          mountPath: /var/lib/mysql
+        image: mysql:5.7
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_RANDOM_ROOT_PASSWORD
+          value: '1'
+        - name: MYSQL_USER
+          value: {{wp_user}}
+        - name: MYSQL_PASSWORD
+          value: {{wp_pass}}
+        - name: MYSQL_DATABASE
+          value: {{wp_name}}
+        resources:
+          limits:
+            cpu: "0.2"
+            memory: "256Mi"
+      volumes:
+      - name: mysql-storage
+        hostPath:
+          path: {{deployment_root_path}}/{{deploy_name}}/content/mysql/
+          type: Directory
+      - name: wordpress-storage
+        hostPath:
+          path: {{deployment_root_path}}/{{deploy_name}}/content/wordpress/
+          type: Directory    

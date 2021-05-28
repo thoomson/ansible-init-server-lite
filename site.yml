@@ -101,29 +101,47 @@
       version: "{{traefik_version}}"
       pilot_token: "{{traefik_pilot_token}}"
 
-  - name: Install Ghost
-    include_role:
-      name: ghost
-    vars:
-      deploy_name: "ghost-{{ghosts.deploy_name}}"
-      version: "{{ghost_version}}"
-      base_path: "{{ghosts.base_path}}"
-      rule_priority: "{{ghosts.rule_priority}}"
-      record_list:
-        "{{ghosts.record_list}}"
-    loop:
-      "{{ghost_installs}}"
-    loop_control:
-      loop_var: ghosts
+#  - name: Install Ghost
+#    include_role:
+#      name: ghost
+#    vars:
+#      deploy_name: "ghost-{{ghosts.deploy_name}}"
+#      version: "{{ghost_version}}"
+#      base_path: "{{ghosts.base_path}}"
+#      rule_priority: "{{ghosts.rule_priority}}"
+#      record_list:
+#        "{{ghosts.record_list}}"
+#    loop:
+#      "{{ghost_installs}}"
+#    loop_control:
+#      loop_var: ghosts
 
-  - name: Install Commento
+  - name: Install WordPress
     include_role:
-      name: commento
+      name: wordpress
     vars:
-      deploy_name: commento
-      version: "{{commento_app_version}}"
-      version_db: "{{commento_db_version}}"
-      rule_priority: 1
-      base_path: ""
+      deploy_name: "wordpress-{{wordpress.deploy_name}}"
+      version: "{{wordpress_version}}"
+      base_path: "{{wordpress.base_path}}"
+      rule_priority: "{{wordpress.rule_priority}}"
       record_list:
-        - commento.tferdinand.net
+        "{{wordpress.record_list}}"
+      wp_user: "{{wordpress.wp_user}}"
+      wp_pass: "{{wordpress.wp_pass}}"
+      wp_name: "{{wordpress.wp_name}}"  
+    loop:
+      "{{wordpress_installs}}"
+    loop_control:
+      loop_var: wordpress
+
+#  - name: Install Commento
+#    include_role:
+#      name: commento
+#    vars:
+#      deploy_name: commento
+#      version: "{{commento_app_version}}"
+#      version_db: "{{commento_db_version}}"
+#      rule_priority: 1
+#      base_path: ""
+#      record_list:
+#        - commento.komget.net

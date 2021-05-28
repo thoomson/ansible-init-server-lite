@@ -1,0 +1,13 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{deploy_name}}
+  namespace: {{namespace}}
+spec:
+  ports:
+  - port: {{image_port}}
+    name: http
+    protocol: TCP
+  selector:
+    app: {{deploy_name}}

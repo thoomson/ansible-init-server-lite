@@ -1,0 +1,9 @@
+---
+# vars file for traefik
+namespace: default
+image: wordpress
+image_port: 80
+template_files:
+  - deployment
+  - service
+  - ingressroute

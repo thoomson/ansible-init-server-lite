@@ -19,27 +19,9 @@ spec:
         intervalSeconds: 10
         timeoutSeconds: 5
     middlewares:
-      - name: default-security@kubernetescrd
+      - name: security
   tls:
-    secretName: {{deploy_name}}-tls
+    certResolver: le
     options:
       name: mytlsoption
-      namespace: default
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: {{deploy_name}}
-  namespace: {{namespace}}
-spec:
-  entryPoints:
-    - web
-  routes:
-  - kind: Rule
-    match:  ({% for host in record_list %}HostHeader(`{{host}}`) {{ " || " if not loop.last else "" }}{% endfor %})  && PathPrefix(`{{base_path}}/`)
-    services:
-    - name: {{deploy_name}}
-      port: {{image_port}}
-    middlewares:
-      - name: default-security@kubernetescrd
-      - name: default-redirectscheme@kubernetescrd
+      namespace: {{namespace}}

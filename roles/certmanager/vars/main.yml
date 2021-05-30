@@ -1,0 +1,5 @@
+---
+# vars file for cert-manager
+namespace: cert-manager
+template_files:
+  - issuer

@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{deploy_name}}
+  namespace: {{namespace}}
+  labels:
+    app: {{deploy_name}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{deploy_name}}  
+  template:
+    metadata:
+      labels:
+        app: {{deploy_name}}
+    spec:
+      containers:
+      - name: {{deploy_name}}
+        image: myimage
+        ports:
+        - containerPort: {{image_port}}
+        args:
+        - --providers.kubernetescrd
+        - --entrypoints.web.address=:80
+        - --entrypoints.websecure.address=:443
+        - --certificatesresolvers.le.acme.email={{master_mail_address}}
+        - --certificatesresolvers.le.acme.storage=/cert/acme.json
+        - --certificatesResolvers.le.acme.httpChallenge.entryPoint=web
+      - name: nginx
+        image: bitnami/nginx:latest
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: "0.2"
+            memory: "256Mi"

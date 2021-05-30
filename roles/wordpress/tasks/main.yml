@@ -1,11 +1,13 @@
 ---
 # tasks file for traefik
 
-- name: Create traefik deployment path ({{wordpress.deploy_name}})
+- name: Create wordpress deployment path ({{wordpress.deploy_name}})
   file:
     path: "{{item}}"
     mode: '0700'
     state: directory
+    owner: 1001
+    group: 1001
   loop:
     - "{{deployment_root_path}}/{{deploy_name}}"
     - "{{deployment_root_path}}/{{deploy_name}}/content/"

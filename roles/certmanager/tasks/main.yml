@@ -1,0 +1,50 @@
+# tasks file for cert-manager
+
+- name: Create cert-manager deployment path
+  file:
+    path: "{{item}}"
+    mode: '0700'
+    state: directory
+  loop:
+    - "{{deployment_root_path}}/{{deploy_name}}"
+
+- name: Create cert-manager namespace
+  k8s:
+    name: "{{ namespace }}"
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: Get cert-manager template
+  get_url:
+    url: https://github.com/jetstack/cert-manager/releases/download/v1.3.1/cert-manager.yaml
+    dest: "{{deployment_root_path}}/{{deploy_name}}/cert-manager.yml"
+
+- name: Deploy Cert-Manager
+  k8s:
+    src: "{{deployment_root_path}}/{{deploy_name}}/cert-manager.yml"
+    state: present
+
+- name: Wait for cert-manager to be ready
+  shell: "kubectl get pods -n cert-manager"
+  register: certmanager
+  until:      
+    - '" Running "  in certmanager.stdout'      
+  retries: 20
+  delay: 10
+
+- name: Create Kubernetes templates ({{deploy_name}})
+  template:
+    src: "{{item}}.yml.j2"
+    dest: "{{deployment_root_path}}/{{deploy_name}}/{{item}}.yml"
+  loop:
+    "{{template_files}}"
+  register: deployment_changes
+
+- name: Deploy Kubernetes objects ({{deploy_name}})
+  k8s:
+    src: "{{deployment_root_path}}/{{deploy_name}}/{{item}}.yml"
+    state: present
+  loop:
+    "{{template_files}}"
+  when: deployment_changes.changed

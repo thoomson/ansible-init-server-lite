@@ -1,0 +1,13 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{trafik_url}}
+  namespace: {{namespace}}
+spec:
+  dnsNames:
+    - {{trafik_url}}
+  secretName: {{trafik_url}}
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer

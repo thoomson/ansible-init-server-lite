@@ -1,9 +1,11 @@
 ---
 # vars file for traefik
-namespace: default
+namespace: "{{deploy_name}}"
 image: wordpress
-image_port: 80
+image_port: 8080
 template_files:
+  - namespace
   - deployment
   - service
   - ingressroute
+  - certificate

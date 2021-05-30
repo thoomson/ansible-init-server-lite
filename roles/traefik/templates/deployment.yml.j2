@@ -10,6 +10,11 @@ spec:
   selector:
     matchLabels:
       k8s-app: {{deploy_name}}
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate       
   template:
     metadata:
       labels:
@@ -33,16 +38,17 @@ spec:
         - name: traefik
           containerPort: 8080
         args:
+        - --api.dashboard=true
         - --providers.kubernetescrd
+        - --providers.kubernetesingress=true
         - --entrypoints.web.address=:80
         - --entrypoints.websecure.address=:443
-        - --certificatesresolvers.le.acme.email={{master_mail_address}}
-        - --certificatesresolvers.le.acme.storage=/cert/acme.json
-        - --certificatesResolvers.le.acme.httpChallenge.entryPoint=web
-        - --pilot.token={{pilot_token}}
         - --accesslog=true
         - --accesslog.fields.headers.defaultmode=keep
         - --accesslog.fields.headers.names.User-Agent=keep
+        - --log.filePath=/cert/traefik.log
+        - --log.format=json
+        - --log.level=DEBUG
       volumes:
         - name: cert
           hostPath:

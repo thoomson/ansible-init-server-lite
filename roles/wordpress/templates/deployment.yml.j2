@@ -21,51 +21,50 @@ spec:
         app: {{deploy_name}}
     spec:
       containers:
-      - name: {{deploy_name}}
+      - name: wordpress
         volumeMounts:
         - name : wordpress-storage
-          mountPath: /var/www/html
-        image: {{image}}:5.7.2-php8.0-apache
+          mountPath: /bitnami/wordpress
+        image: bitnami/wordpress:latest
         ports:
         - containerPort: {{image_port}}
-        args:
-        - --providers.kubernetescrd
-        - --entrypoints.web.address=:80
-        - --entrypoints.websecure.address=:443
-        - --certificatesresolvers.le.acme.email={{master_mail_address}}
-        - --certificatesresolvers.le.acme.storage=/cert/acme.json
-        - --certificatesResolvers.le.acme.httpChallenge.entryPoint=web
         env:
-        - name: WORDPRESS_DB_HOST
+        - name: ALLOW_EMPTY_PASSWORD
+          value: '1'
+        - name: WORDPRESS_DATABASE_HOST
           value: 127.0.0.1
-        - name: WORDPRESS_DB_USER
+        - name: WORDPRESS_DATABASE_USER
           value: {{wp_user}}
-        - name: WORDPRESS_DB_PASSWORD
+        - name: WORDPRESS_DATABASE_PASSWORD
           value: {{wp_pass}}
-        - name: WORDPRESS_DB_NAME
+        - name: WORDPRESS_DATABASE_NAME
           value: {{wp_name}}
-      - name: mysql
+        - name: WORDPRESS_USERNAME
+          value: john
+        - name: WORDPRESS_PASSWORD
+          value: doe
+      - name: mariadb
         volumeMounts:
-        - name : mysql-storage
-          mountPath: /var/lib/mysql
-        image: mysql:5.7
+        - name : mariadb-storage
+          mountPath: /bitnami/mariadb
+        image: bitnami/mariadb:latest
         ports:
         - containerPort: 3306
         env:
-        - name: MYSQL_RANDOM_ROOT_PASSWORD
+        - name: ALLOW_EMPTY_PASSWORD
           value: '1'
-        - name: MYSQL_USER
+        - name: MARIADB_USER
           value: {{wp_user}}
-        - name: MYSQL_PASSWORD
+        - name: MARIADB_PASSWORD
           value: {{wp_pass}}
-        - name: MYSQL_DATABASE
+        - name: MARIADB_DATABASE
           value: {{wp_name}}
         resources:
           limits:
             cpu: "0.2"
             memory: "256Mi"
       volumes:
-      - name: mysql-storage
+      - name: mariadb-storage
         hostPath:
           path: {{deployment_root_path}}/{{deploy_name}}/content/mysql/
           type: Directory
